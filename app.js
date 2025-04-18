@@ -5,16 +5,19 @@ module.exports = (req, res, next) => {
 
   if (req.method !== 'REGISTER') return next();
 
+  if (!req.has('Contact')) {
+    return res.send(400, {
+      headers: {
+        'X-Reason': 'Contact header is required for REGISTER requests'
+      }
+    });
+  }
+
   req.registration = {};
 
   const contact = req.getParsedHeader('Contact') ;
   const to = req.getParsedHeader('To') ;
   const expiresHeader = req.get('Expires') ;
-
-  //contact header is required
-  if (!req.get('Contact') || !contact.length) {
-    return res.send(400) ;
-  }
 
   let expires;
   if (contact[0].params && contact[0].params.expires) expires = parseInt(contact[0].params.expires)
