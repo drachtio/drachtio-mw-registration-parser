@@ -1,6 +1,6 @@
 {
   "name": "drachtio-mw-registration-parser",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "drachtio middleware for parsing SIP Authorization header",
   "main": "app.js",
   "scripts": {
