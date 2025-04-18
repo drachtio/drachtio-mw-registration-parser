@@ -1,7 +1,7 @@
 const test = require('blue-tape');
 const fs = require('fs');
-const Request = require('drachtio').Request;
-const SipMessage = require('drachtio-sip').SipMessage;
+const Request = require('drachtio-srf/lib/request');
+const SipMessage = require('drachtio-srf/lib/sip-parser/message');
 var mw = require('..') ;
 
 test('parse register', (t) => {
@@ -23,6 +23,28 @@ test('parse register', (t) => {
     t.equal(req.registration.aor, 'sip:167356@10.128.77.12', 'AOR parsed ok');
     t.end();
   });    
+});
+
+test('reject parse register without contact header', (t) => {
+
+  let register = fs.readFileSync(`${__dirname}/data/register-no-contact.txt`, 'utf8').replace(/\n/g, '\r\n');
+  //console.log(register);
+  const msg = new SipMessage(register);
+  const req = new Request(msg, {});
+  let resStatus = 0;
+  const res = {
+    send: (status) => resStatus = status
+  }
+  mw(req, res, (err) => {
+    //console.log(`${JSON.stringify(req.registration)}`);
+    t.notOk(err, 'Middleware should not call next for requests without Contact header');
+    t.end();
+  });
+
+  setTimeout(() => {
+    t.equal(resStatus, 400, 'response should be rejected with 400 Bad Request');
+    t.end();
+  }, 10);
 });
 
 test('parse unregister', (t) => {
